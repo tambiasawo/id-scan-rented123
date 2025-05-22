@@ -415,7 +415,6 @@ const PdfGenerator = ({
         title: "ID Verification Report",
         author: "Rented123",
         keywords: `${activeToken} ${last_name} ${dob}`,
-        creator: "Rented123 Verification System",
       });
 
       // Save and upload the PDF
