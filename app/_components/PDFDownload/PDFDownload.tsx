@@ -412,7 +412,7 @@ const PdfGenerator = ({
 
       // Set document properties
       doc.setProperties({
-        title: "ID Verification Report",
+        title: "ID Verification Result",
         author: "Rented123",
         keywords: `${activeToken} ${last_name} ${dob}`,
       });
