@@ -154,7 +154,7 @@ function App() {
   return (
     <div className="min-h-[80vh] md:min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {verifyingToken ? (
-        <div className="absolute top-[40%] left-[40%] md:left-[45%]">
+        <div className="absolute top-[40%] left-[38%] md:left-[45%]">
           <h2> Verifying Token...</h2>
         </div>
       ) : (

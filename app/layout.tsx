@@ -5,6 +5,9 @@ import Header from "./_components/Header/Header";
 export const metadata: Metadata = {
   title: "ID Verification | Rented123",
   description: "Scan your ID and verify yourself ",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({
