@@ -3,12 +3,12 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   const { idImage, selfieImage } = await req.json();
   try {
-    const response = await fetch(`${process.env.API_PROD_URL}`, {
+    const response = await fetch(`${process.env.API_TEST_URL}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "x-api-key": process.env.API_KEY_PROD as string,
+        "x-api-key": process.env.API_KEY_TEST as string,
       },
       body: JSON.stringify({
         document: idImage,
@@ -28,8 +28,18 @@ export async function POST(req: Request) {
       );
     }
     const data = await response.json();
+    const verificationPassed =
+      data.verificationStatus === "VERIFIED" ||
+      (data.textFields &&
+        data.expirationDate &&
+        data.mrzVerification &&
+        data.securityChecks &&
+        data.portraitComparison);
 
-    return NextResponse.json(data);
+    return NextResponse.json({
+      verificationData: data,
+      isVerified: verificationPassed,
+    });
   } catch (err) {
     console.error(err);
     return NextResponse.json(

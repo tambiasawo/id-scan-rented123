@@ -22,5 +22,7 @@ button.btn {
 button:hover {
   opacity: 0.85;
 }
-
+dialog:not([open]) {
+  display: none;
+}
 /* pages/404.module.css */
