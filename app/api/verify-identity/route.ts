@@ -31,17 +31,16 @@ export async function POST(req: Request) {
     const verificationPassed =
       data.verificationStatus === "VERIFIED" ||
       (data.textFields &&
+        data.documentType &&
         data.expirationDate &&
-        data.mrzVerification &&
-        data.securityChecks &&
+        (data.mrzVerification || data.securityChecks) &&
         data.portraitComparison);
-
     return NextResponse.json({
       verificationData: data,
       isVerified: verificationPassed,
     });
   } catch (err) {
-    console.error(err);
+    console.log("Verification error", err);
     return NextResponse.json(
       { message: "An unexpected error occurred" },
       { status: 500 }
