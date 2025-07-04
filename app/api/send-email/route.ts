@@ -43,13 +43,13 @@ export async function POST(req: Request) {
         },
       },
     },
-    ConfigurationSetName:'my-first-configuration-set'
+    ConfigurationSetName: "my-first-configuration-set",
   };
 
   try {
     // Send email via SES
     const data = await ses.send(new SendEmailCommand(params));
-    console.log("Email sent successfully:", data);
+    console.log("Email sent successfully");
     return NextResponse.json(data);
   } catch (err) {
     console.error("Email sending error:", err);

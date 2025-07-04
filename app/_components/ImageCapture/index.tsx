@@ -1,334 +1,218 @@
 "use client";
-import React, {
-  Dispatch,
-  useEffect,
-  SetStateAction,
-  useRef,
-  useState,
-} from "react";
-import styles from "./ImageCapture.module.css";
-import PdfGenerator from "../PDFDownload/PDFDownload";
+import React, { useState, useCallback } from "react";
+import ProgressBar from "../ProgressBar";
+import IdUploadStep from "../IdUpload";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getToken } from "@/app/actions";
-import QRCode from "../QRCode/QRCode";
 import useIsMobile from "@/app/utils";
+import QRCode from "../QRCode/QRCode";
+import SelfieStep from "../SelfieStep";
+import SubmitStep from "../SubmitStep";
+import ResultStep from "../ResultStep";
+import { UserData, VerificationResultDataType } from "@/app/types";
 
-const IdentityVerification = () => {
+function App() {
+  const [currentStep, setCurrentStep] = useState(1);
+  const [userData, setUserData] = useState<UserData>({
+    idPhoto: "",
+    selfiePhoto: "",
+  });
+  const [verificationResult, setVerificationResult] = useState<boolean | null>(
+    null
+  );
+  const [verificationData, setVerificationData] = useState<
+    Array<VerificationResultDataType>
+  >([]);
+
   const isMobileDevice = useIsMobile();
-  const [idImage, setIdImage] = useState("");
-  const [selfieImage, setSelfieImage] = useState("");
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [data, setData] = useState([]);
-  const [showQRCode, setShowQRCode] = React.useState(false);
-  const [error, setError] = useState<null | string>(null);
-  const [isCameraOn, setIsCameraOn] = useState<boolean | undefined>(undefined);
-  const [activeToken, setActiveToken] = useState("");
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const router = useRouter();
-  const videoRef = useRef<null | HTMLVideoElement>(null);
-  const canvasRef = useRef<null | HTMLCanvasElement>(null);
+  const [showQRCode, setShowQRCode] = React.useState(false);
+  const [activeToken, setActiveToken] = useState("");
+  const [verifyingToken, setVerifyingToken] = React.useState(true);
+
+  const totalSteps = 3;
 
   const verifyToken = React.useCallback(
     async (token: string | null) => {
       const activeToken = await getToken(token as string);
       if (!activeToken) {
         router.push("/404");
-      } else if (activeToken.product !== "idscan") router.push("/404");
-      else {
+      } else if (activeToken.product !== "idscan") {
+        router.push("/404");
+      } else {
         setActiveToken(activeToken.token);
+        setVerifyingToken(false);
       }
     },
     [router]
   );
 
-  const handleSubmitVerification = async () => {
-    try {
-      setError(null);
-      setData([]);
-      setLoading(true);
-
-      const response = await fetch("/api/verify-identity", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ selfieImage, idImage }),
-      });
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.log("Verification error:", errorData.message);
-        setError(errorData.message);
-        setLoading(false);
-        return; // Stop execution if the response is not OK
-      }
-      const data = await response.json();
-      setData(data);
-
-      setLoading(false);
-      setStep(3);
-    } catch (err) {
-      setLoading(false);
-      console.log("Verification failed:", err);
+  const nextStep = () => {
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
     }
   };
 
-  const checkCameraStatus = async (step: number) => {
-    await navigator.mediaDevices
-      .getUserMedia({
-        video: { facingMode: step > 1 ? "user" : "environment" },
-      })
-      .then((stream) => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-        setIsCameraOn(true);
-      })
-      .catch(() => setIsCameraOn(false));
-  };
-
-  const captureImage = (setImage: Dispatch<SetStateAction<string>>) => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    if (video && canvas) {
-      const context = canvas.getContext("2d");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      context?.drawImage(video, 0, 0, canvas.width, canvas.height);
-      setImage(canvas.toDataURL("image/jpeg"));
-      setStep(2);
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
     }
   };
 
-  useEffect(() => {
+  const handleVerificationComplete = useCallback(
+    (success: boolean, data: VerificationResultDataType[]) => {
+      setVerificationResult(success);
+      setVerificationData(data);
+      setCurrentStep(4); // Move to result step
+    },
+    []
+  );
+
+  const restartVerification = useCallback(() => {
+    setCurrentStep(1);
+    setVerificationResult(null);
+    setUserData({
+      idPhoto: null,
+      selfiePhoto: null,
+    });
+  }, []);
+
+  const updateIdPhoto = useCallback((idPhotoData: string) => {
+    setUserData((prev) => ({
+      ...prev,
+      idPhoto: idPhotoData,
+    }));
+  }, []);
+
+  const updateSelfiePhoto = useCallback((photoData: string) => {
+    setUserData((prev) => ({
+      ...prev,
+      selfiePhoto: photoData,
+    }));
+  }, []);
+
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <IdUploadStep
+            onNext={nextStep}
+            onPhotoUpdate={updateIdPhoto}
+            existingPhoto={userData.idPhoto}
+          />
+        );
+      case 2:
+        return (
+          <SelfieStep
+            onNext={nextStep}
+            onBack={prevStep}
+            onPhotoUpdate={updateSelfiePhoto}
+            existingPhoto={userData.selfiePhoto}
+          />
+        );
+      case 3:
+        return (
+          <SubmitStep
+            onBack={prevStep}
+            onComplete={handleVerificationComplete}
+            userData={userData}
+          />
+        );
+      case 4:
+        return (
+          <ResultStep
+            isSuccess={verificationResult || false}
+            onRestart={restartVerification}
+            verificationResultData={{
+              verificationData,
+              idImage: userData.idPhoto,
+            }}
+            activeToken={activeToken}
+          />
+        );
+      default:
+        return (
+          <IdUploadStep
+            onNext={nextStep}
+            onPhotoUpdate={updateIdPhoto}
+            existingPhoto={userData.idPhoto}
+          />
+        );
+    }
+  };
+
+  React.useEffect(() => {
     if (!token) {
       router.push("/404");
     } else {
       verifyToken(token);
-      checkCameraStatus(step);
     }
-  }, [token, verifyToken, router, checkCameraStatus]);
+  }, [token, verifyToken, router]);
 
-  useEffect(() => {
-    checkCameraStatus(step);
-  }, [step]);
-
-  if (error)
-    return (
-      <div className={styles.errorContainer}>
-        <div style={{ marginTop: "50px", color: "red" }}>
-          <p style={{ textAlign: "center" }}>
-            Some texts in the ID image were unreadable.{" "}
-          </p>
-          <p style={{ textAlign: "center" }}>
-            Please ensure you follow all our image requirements when taking a
-            photo as shown{" "}
-            <a
-              href="https://docs.regulaforensics.com/develop/doc-reader-sdk/overview/image-quality-requirements/"
-              target="_blank"
-              className="underline"
-            >
-              here
-            </a>{" "}
-          </p>
+  return (
+    <div className="min-h-[80vh] md:min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {verifyingToken ? (
+        <div className="absolute top-[40%] left-[43%]">
+          <h2> Verifying Token...</h2>
         </div>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            rowGap: "20px",
-            marginTop: "60px",
-          }}
-        >
-          <span
-            onClick={() => {
-              setSelfieImage("");
-              setIdImage("");
-              setStep(1);
-              setError(null);
-              setLoading(false);
-              setShowQRCode(false);
-            }}
-            className={styles.bottomText}
-          >
-            Try again
-          </span>
-          {!isMobileDevice && !showQRCode && (
-            <span
-              className={styles.bottomText}
-              onClick={() => {
-                setShowQRCode(true);
-                setError(null);
-                setSelfieImage("");
-                setIdImage("");
-                setStep(0);
-              }}
-            >
-              {" "}
-              Switch to mobile
-            </span>
-          )}
-          {showQRCode && (
+      ) : (
+        <div className="container mx-auto px-4 py-8">
+          {showQRCode ? (
             <QRCode
               url={`https://services.idscan.rented123.com/?token=${activeToken}`}
               token={activeToken}
             />
-          )}{" "}
-        </div>
-      </div>
-    );
-  return (
-    <div className={styles.container}>
-      {loading && (
-        <div className={styles.loadingOverlay}>
-          <div className={styles.spinner}></div>
-        </div>
-      )}
-
-      <div className={styles.stepContainer}>
-        {!isMobileDevice && step === 1 && !showQRCode && (
-          <span
-            className={styles.bottomText}
-            onClick={() => {
-              setShowQRCode(true);
-            }}
-          >
-            For a better experience switch to your phone
-          </span>
-        )}
-        {step === 1 && !showQRCode && (
-          <div className={styles.step}>
-            <h2 className={`${styles.header}`}>Step 1: Capture ID Document</h2>
-            <span
-              style={{
-                fontSize: "13px",
-                textAlign: "center",
-                marginBottom: "9px",
-              }}
-            >
-              Ensure you are in a <strong> well lit</strong> area and the image
-              is <strong>sharp and readable </strong>
-            </span>
-            <p></p>
-            {isCameraOn ? (
-              <>
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  muted
-                  playsInline
-                  className={styles.webcam}
-                ></video>
-                <canvas ref={canvasRef} style={{ display: "none" }}></canvas>{" "}
-                <button
-                  className="btn"
-                  onClick={() => captureImage(setIdImage)}
-                >
-                  Capture ID
-                </button>
-                <p className="text-xs mt-2 text-center">
-                  {" "}
-                  For a better capture of your ID, please{" "}
-                  <strong> follow all image capture requirements</strong> as
-                  listed{" "}
-                  <a
-                    href="https://docs.regulaforensics.com/develop/doc-reader-sdk/overview/image-quality-requirements/"
-                    target="_blank"
-                    className="underline"
+          ) : (
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 md:pt-6">
+                {!isMobileDevice && currentStep === 1 && !showQRCode && (
+                  <h4
+                    className="font-semibold text-center text-sm cursor-pointer underline mb-6"
+                    onClick={() => {
+                      setShowQRCode(true);
+                    }}
                   >
-                    here
-                  </a>
-                </p>
-              </>
-            ) : (
-              <div
-                className={styles.webcam}
-                style={{
-                  height: "200px",
-                  display: "grid",
-                  placeItems: "center",
-                }}
-              >
-                {isCameraOn === undefined
-                  ? "Loading Camera..."
-                  : "⚠️ Camera not detected"}
+                    Switch to a mobile device
+                  </h4>
+                )}
+                {currentStep <= 3 && (
+                  <ProgressBar
+                    currentStep={currentStep}
+                    totalSteps={totalSteps}
+                  />
+                )}
+                {renderStep()}
               </div>
-            )}
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="text-center mt-12">
+            <p className="text-sm text-gray-500">
+              Powered by Rented123 AI technology •{" "}
+              <a
+                href="https://rented123.com/privacy-policy"
+                target="_blank"
+                className="underline"
+              >
+                Privacy Policy{" "}
+              </a>
+              •{" "}
+              <a
+                href="https://rented123.com/terms-and-conditions"
+                target="_blank"
+                className="underline"
+              >
+                Terms of Use{" "}
+              </a>
+            </p>
           </div>
-        )}
-        {showQRCode && (
-          <QRCode
-            url={`https://services.idscan.rented123.com/?token=${activeToken}`}
-            token={activeToken}
-          />
-        )}{" "}
-        {step === 2 && (
-          <div className={styles.step}>
-            <h2 className={styles.header}>Step 2: Capture Selfie</h2>
-            {!selfieImage ? (
-              <>
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  muted
-                  playsInline
-                  className={styles.faceWebcam}
-                ></video>
-                <canvas ref={canvasRef} style={{ display: "none" }}></canvas>
-
-                <button
-                  onClick={() => captureImage(setSelfieImage)}
-                  className={`btn ${styles.captureButton}`}
-                >
-                  Capture Selfie
-                </button>
-              </>
-            ) : (
-              <img
-                src={selfieImage}
-                alt="selfie"
-                className={styles.faceWebcam}
-              />
-            )}
-          </div>
-        )}
-      </div>
-
-      {idImage && selfieImage && step === 2 && (
-        <button
-          className="btn"
-          onClick={handleSubmitVerification}
-          style={{ marginTop: "15px" }}
-        >
-          Submit for Verification
-        </button>
-      )}
-
-      {idImage && step == 2 && (
-        <span
-          onClick={() => {
-            setSelfieImage("");
-            setIdImage("");
-            setStep(1);
-          }}
-          className={styles.bottomText}
-          style={{ marginTop: "20px" }}
-        >
-          Start all over
-        </span>
-      )}
-      {step === 3 && (
-        <div className={styles.iframeParentContainer}>
-          <PdfGenerator
-            data={data}
-            idImage={idImage}
-            activeToken={activeToken}
-          />
         </div>
       )}
     </div>
   );
-};
+}
 
-export default IdentityVerification;
+export default App;
