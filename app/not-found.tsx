@@ -25,7 +25,7 @@ export default function NotFound() {
           Oops! It seems like your token has expired.
         </p>
         <Link
-          href="https://rented123.com/product/id-scan"
+          href="https://rented123.com/product/id-verification/"
           target="_blank"
           className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition"
         >
