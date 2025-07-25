@@ -281,8 +281,8 @@ const ResultStep: React.FC<ResultStepProps> = ({
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <div className="mx-auto w-24 h-24 bg-gradient-to-r from-red-500 to-pink-600 rounded-full flex items-center justify-center mb-6">
-          <XCircle className="w-12 h-12 text-white" />
+        <div className="mx-auto w-12 h-12 md:w-24 md:h-24 bg-gradient-to-r from-red-500 to-pink-600 rounded-full flex items-center justify-center mb-6">
+          <XCircle className="w-6 h-6 md:w-12 md:h-12 text-white" />
         </div>
 
         <h2 className="text-3xl font-bold text-gray-900 mb-2">
@@ -296,33 +296,34 @@ const ResultStep: React.FC<ResultStepProps> = ({
 
       {/* Error Details */}
       <div className="space-y-4">
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+        <div className="bg-red-50 border border-red-200 rounded-xl px-6 py-4">
           <div className="flex items-start space-x-3">
-            <AlertTriangle className="w-6 h-6 text-red-600 mt-1 flex-shrink-0" />
             <div className="flex-1">
-              <h3 className="font-semibold text-red-900 mb-3">Issues Found:</h3>
+              <h3 className="font-semibold text-red-900 mb-3">
+                Possible Issues:
+              </h3>
               <ul className="space-y-2 text-sm text-red-800">
                 <li className="flex items-start space-x-2">
-                  <div className="w-1.5 h-1.5 bg-red-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <AlertTriangle className="w-4 h-4 text-red-600 mt-1 flex-shrink-0" />
                   <span>
                     Document quality too low - text appears blurry or unclear
                   </span>
                 </li>
                 <li className="flex items-start space-x-2">
-                  <div className="w-1.5 h-1.5 bg-red-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <AlertTriangle className="w-4 h-4 text-red-600 mt-1 flex-shrink-0" />
                   <span>
                     Facial recognition confidence below threshold (67% - minimum
                     85% required)
                   </span>
                 </li>
                 <li className="flex items-start space-x-2">
-                  <div className="w-1.5 h-1.5 bg-red-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <AlertTriangle className="w-4 h-4 text-red-600 mt-1 flex-shrink-0" />
                   <span>
                     Glare detected on document surface affecting readability
                   </span>
                 </li>
                 <li className="flex items-start space-x-2">
-                  <div className="w-1.5 h-1.5 bg-red-600 rounded-full mt-2 flex-shrink-0"></div>
+                  <AlertTriangle className="w-4 h-4 text-red-600 mt-1 flex-shrink-0" />
                   <span>
                     Check the expiry date. Your ID might have expired{" "}
                   </span>
