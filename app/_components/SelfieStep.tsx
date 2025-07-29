@@ -152,7 +152,7 @@ const SelfieStep: React.FC<SelfieStepProps> = ({
         {photo && (
           <button
             onClick={onNext}
-            className="flex-1 w-full bg-gradient-to-r from-blue-600 to-[#32429b] text-white py-3 px-6 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
+            className="flex-1 w-full bg-gradient-to-r from-blue-700 to-purple-700 text-white py-3 px-6 rounded-lg font-semibold  transition-all duration-300 transform hover:scale-105 shadow-lg"
           >
             Continue to Submit
           </button>

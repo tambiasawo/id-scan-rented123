@@ -17,7 +17,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
                 index + 1 <= currentStep
-                  ? "bg-gradient-to-r from-blue-500 to-[#32429b] text-white shadow-lg"
+                  ? "bg-gradient-to-r from-blue-700 to-purple-700 text-white shadow-lg"
                   : "bg-gray-200 text-gray-500"
               }`}
             >
@@ -33,7 +33,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
       </div>
       <div className="w-full bg-gray-200 rounded-full h-2">
         <div
-          className="bg-gradient-to-r from-blue-500 to-[#32429b] h-2 rounded-full transition-all duration-500 ease-out"
+          className="bg-gradient-to-r from-blue-700 to-purple-700 h-2 rounded-full transition-all duration-500 ease-out"
           style={{ width: `${(currentStep / totalSteps) * 100}%` }}
         ></div>
       </div>
