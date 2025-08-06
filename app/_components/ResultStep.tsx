@@ -80,17 +80,20 @@ const ResultStep: React.FC<ResultStepProps> = ({
   const preparePDF = React.useCallback(async () => {
     const { doc, s3Url, first_name, last_name } =
       await generateVerificationReport(verificationResultData, activeToken);
-    if (/^https?:\/\/\S+\.\S+/.test(s3Url) && doc) {
+    setEmailDetails({ s3Url, first_name, last_name });
+    setPdfDoc(doc);
+    console.log({ s3Url, first_name, last_name, doc });
+    /* if (/^https?:\/\/\S+\.\S+/.test(s3Url) && doc) {
       setEmailDetails({ s3Url, first_name, last_name });
       setPdfDoc(doc);
     } else {
-      setServerErrorMessage(
+        setServerErrorMessage(
         "Sorry, we could not generate the complete PDF. Please try again or contact us."
       );
       alertRef.current?.alert(
         "Sorry, we could not generate the complete PDF. Please try again or contact us."
       );
-    }
+    } */
   }, [verificationResultData, activeToken]);
 
   useEffect(() => {
@@ -215,7 +218,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
           <div className="flex space-x-3">
             <button
               onClick={handleDownload}
-              disabled={!Boolean(pdfDoc)}
+              // disabled={!Boolean(pdfDoc)}
               className="disabled:cursor-not-allowed flex-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-[#32429b] text-white py-3 px-4 rounded-lg font-semibold hover:blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
             >
               <Download className="w-5 h-5" />
@@ -242,7 +245,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
               />
               <button
                 onClick={handleEmailSend}
-                disabled={!email || !emailDetails.s3Url}
+                disabled={!email}
                 className="w-full bg-gray-700 text-white py-3 px-4 rounded-lg font-semibold hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 Send Report via Email
