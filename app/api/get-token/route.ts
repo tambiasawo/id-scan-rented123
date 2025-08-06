@@ -20,10 +20,15 @@ export async function GET(req: NextRequest) {
           .CF_ACCESS_CLIENT_SECRET as string,
       },
     });
-    console.log("👉 Fetch URL:", process.env.WORDPRESS_TOKEN_BASE_API, {
-      base,
-    });
-    console.log("👉 Status:", response.status, response.statusText);
+    console.log(
+      "👉 Fetch URL:",
+      process.env.WORDPRESS_TOKEN_BASE_API,
+      process.env.CF_ACCESS_CLIENT_ID,
+      process.env.CF_ACCESS_CLIENT_SECRET,
+      {
+        base,
+      }
+    );
 
     // Grab raw text first
     const text = await response.text();
