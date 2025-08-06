@@ -18,7 +18,17 @@ export async function GET(req: Request) {
         },
       }
     );
-    console.log("API Response", response);
+
+    console.log("API Response", response.ok, response.statusText);
+    const base = (process.env.WORDPRESS_TOKEN_BASE_API || "").replace(
+      /\/+$/,
+      ""
+    );
+    const url = `${base}/wp-json/scan_id/v1/get-token?token=${encodeURIComponent(
+      token
+    )}`;
+
+    console.log("🔗 Fetching token from:", url);
     if (!response.ok) {
       const error = await response.json();
       console.log("API Route error: ", error);
