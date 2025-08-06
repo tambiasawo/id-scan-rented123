@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, act } from "react";
 import ProgressBar from "../ProgressBar";
 import IdUploadStep from "../IdUpload";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -37,6 +37,7 @@ function App() {
   const verifyToken = React.useCallback(
     async (token: string | null) => {
       const activeToken = await getToken(token as string);
+      console.log("token", { activeToken });
       if (!activeToken) {
         router.push("/404");
       } else if (activeToken.product !== "idscan") {
