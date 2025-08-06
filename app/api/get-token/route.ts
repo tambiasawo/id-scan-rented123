@@ -19,7 +19,7 @@ export async function GET(req: Request) {
       }
     );
 
-    console.log("API Response", response.ok, response.statusText);
+    console.log("base url: ", process.env.WORDPRESS_TOKEN_BASE_API);
     const base = (process.env.WORDPRESS_TOKEN_BASE_API || "").replace(
       /\/+$/,
       ""
@@ -28,7 +28,7 @@ export async function GET(req: Request) {
       token
     )}`;
 
-    console.log("🔗 Fetching token from:", url);
+    console.log("🔗 Fetching token from:", base);
     if (!response.ok) {
       const error = await response.json();
       console.log("API Route error: ", error);
