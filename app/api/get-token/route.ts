@@ -18,9 +18,10 @@ export async function GET(req: Request) {
         },
       }
     );
+    console.log("API Response", response);
     if (!response.ok) {
       const error = await response.json();
-      console.log('API Route error: ',error)
+      console.log("API Route error: ", error);
       return NextResponse.json(
         {
           message:
@@ -31,6 +32,7 @@ export async function GET(req: Request) {
     }
 
     const data = await response.json();
+    console.log("API Data", { data });
     return NextResponse.json(data);
   } catch (err) {
     console.error("Could not fetch token:", err);
