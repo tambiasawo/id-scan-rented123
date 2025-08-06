@@ -39,9 +39,11 @@ function App() {
       const activeToken = await getToken(token as string);
       console.log("token", { activeToken });
       if (!activeToken) {
-        router.push("/404");
+        //router.push("/404");
+        setVerifyingToken(false);
       } else if (activeToken.product !== "idscan") {
-        router.push("/404");
+        //router.push("/404");
+        setVerifyingToken(false);
       } else {
         setActiveToken(activeToken.token);
         setVerifyingToken(false);
