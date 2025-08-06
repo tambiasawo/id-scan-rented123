@@ -13,7 +13,12 @@ export async function GET(req: NextRequest) {
   try {
     const response = await fetch(url, {
       method: "GET",
-      headers: { Accept: "application/json" },
+      headers: {
+        Accept: "application/json",
+        "CF-Access-Client-ID": process.env.CF_ACCESS_CLIENT_ID as string,
+        "CF-Access-Client-Secret": process.env
+          .CF_ACCESS_CLIENT_SECRET as string,
+      },
     });
     console.log("👉 Fetch URL:", process.env.WORDPRESS_TOKEN_BASE_API, {
       base,
