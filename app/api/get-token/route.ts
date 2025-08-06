@@ -15,7 +15,9 @@ export async function GET(req: NextRequest) {
       method: "GET",
       headers: { Accept: "application/json" },
     });
-    console.log("👉 Fetch URL:", url);
+    console.log("👉 Fetch URL:", process.env.WORDPRESS_TOKEN_BASE_API, {
+      base,
+    });
     console.log("👉 Status:", response.status, response.statusText);
 
     // Grab raw text first
