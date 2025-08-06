@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
 
     // Grab raw text first
     const text = await response.text();
-    console.log("📥 Raw response (first 200 chars):", text.slice(0, 500));
+    console.log("📥 Raw response (first 200 chars):", text.slice(0, 1000));
 
     // Inspect content‐type header
     console.log("📑 Content-Type:", response.headers.get("content-type"));
