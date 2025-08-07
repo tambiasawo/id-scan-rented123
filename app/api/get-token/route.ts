@@ -14,6 +14,10 @@ export async function GET(req: NextRequest) {
     process.env.WORDPRESS_TOKEN_BASE_API
   );
   console.log("🔐 CF_ACCESS_CLIENT_ID   =", process.env.CF_ACCESS_CLIENT_ID);
+  console.log(
+    "🔐 CF_ACCESS_CLIENT_SECRET   =",
+    process.env.CF_ACCESS_CLIENT_SECRET
+  );
 
   // 2) Build URL & headers
   const base = (process.env.WORDPRESS_TOKEN_BASE_API || "").replace(/\/+$/, "");
@@ -24,7 +28,11 @@ export async function GET(req: NextRequest) {
     "CF-Access-Client-Secret": process.env.CF_ACCESS_CLIENT_SECRET as string,
   };
   console.log("👉 Fetch URL:", url);
-  console.log("👉 Fetch headers:", headers);
+  console.log(
+    "👉 Fetch headers:",
+    headers["Accept"],
+    headers["CF-Access-Client-Id"]
+  );
 
   // 3) Fetch
   const response = await fetch(url, { headers });
@@ -34,7 +42,7 @@ export async function GET(req: NextRequest) {
     response.headers.get("content-type")
   );
   const text = await response.text();
-  console.log("📄 Raw body (first 200 chars):", text.slice(0, 100));
+  console.log("📄 Raw body (first 500 chars):", text.slice(0, 500));
 
   // 4) Parse or error
   if (!response.ok) {
