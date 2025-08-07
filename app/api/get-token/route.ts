@@ -12,10 +12,7 @@ export async function GET(req: NextRequest) {
     process.env.WORDPRESS_TOKEN_BASE_API
   );
   console.log("🔐 CF_ACCESS_CLIENT_ID   =", process.env.CF_ACCESS_CLIENT_ID);
-  console.log(
-    "🔐 CF_ACCESS_CLIENT_SECRET   =",
-    process.env.CF_ACCESS_CLIENT_SECRET
-  );
+  console.log("🔐 CF_ACCESS_CLIENT_SECRET   =", process.env.CF_ACCESS_CLIENT);
 
   // 2) Build URL & headers
   const base = (process.env.WORDPRESS_TOKEN_BASE_API || "").replace(/\/+$/, "");
@@ -23,7 +20,7 @@ export async function GET(req: NextRequest) {
   const headers = {
     Accept: "application/json",
     "CF-Access-Client-Id": process.env.CF_ACCESS_CLIENT_ID as string,
-    "CF-Access-Client-Secret": process.env.CF_ACCESS_CLIENT_SECRET as string,
+    "CF-Access-Client-Secret": process.env.CF_ACCESS_CLIENT as string,
   };
   console.log("👉 Fetch URL:", url);
   console.log(
