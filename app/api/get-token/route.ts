@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import https from "https";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const agent = new https.Agent({ rejectUnauthorized: false });
 
   const token = searchParams.get("token") as string;
   console.log("🔍 Incoming token:", token);
