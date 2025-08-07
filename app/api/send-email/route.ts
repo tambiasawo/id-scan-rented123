@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     },
   });
   const params = {
-    Source: "reports@rented123.com",
+    Source: "admin@rented123.com",
     Destination: {
       ToAddresses: recipientEmail
         ? ["reports@rented123.com", recipientEmail]
@@ -25,16 +25,16 @@ export async function POST(req: Request) {
     },
     Message: {
       Subject: {
-        Data: `ID Scan Report for ${userDetails.last_name}, ${userDetails.first_name}`,
+        Data: `ID Verification Report for ${userDetails.first_name} ${userDetails.last_name}`,
       },
       Body: {
         Text: {
-          Data: `ID Scan Report for ${userDetails.last_name}, ${userDetails.first_name}. You can download your report from this link: ${pdfUrl}`,
+          Data: `ID Verification Report for ${userDetails.first_name} ${userDetails.last_name}. You can download your report from this link: ${pdfUrl}`,
         },
         Html: {
           Data: `
             <p>Hi ${userDetails.first_name},</p>
-            <p>Congratulations! Your ID has been successfully verified. Click the link below to download the report</p>
+            <p>Congratulations! Your ID has been successfully verified. Please click the link below to download the report</p>
             <p>${pdfUrl}</p>
             <br>
             <p>Happy Renting</p>
@@ -49,6 +49,7 @@ export async function POST(req: Request) {
   try {
     // Send email via SES
     const data = await ses.send(new SendEmailCommand(params));
+     console.log(data);
     console.log("Email sent successfully");
     return NextResponse.json(data);
   } catch (err) {

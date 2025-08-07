@@ -33,7 +33,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
   verificationResultData,
   activeToken,
 }) => {
-  const [isEmailSent, setIsEmailSent] = useState(false);
+  const [isEmailButtonTouched, setIsEmailButtonTouched] = useState(false);
   const [email, setEmail] = useState("");
   const [showPdfPreview, setShowPdfPreview] = useState(false);
   const [emailDetails, setEmailDetails] = useState({
@@ -58,23 +58,24 @@ const ResultStep: React.FC<ResultStepProps> = ({
 
   const handleEmailSend = async () => {
     if (!email) return;
-
-    const response = await emailPDF(
-      {
-        last_name: emailDetails.last_name,
-        first_name: emailDetails.first_name,
-      },
-      emailDetails.s3Url,
-      email
-    );
-    if (!response.ok) {
-      setIsEmailSent(false);
+    try {
+      const response = await emailPDF(
+        {
+          last_name: emailDetails.last_name,
+          first_name: emailDetails.first_name,
+        },
+        emailDetails.s3Url,
+        email
+      );
+      if (!response.ok) {
+        throw new Error("Could not send email");
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      setIsEmailButtonTouched(true);
+    } catch (e) {
+      setIsEmailButtonTouched(true);
       setEmailFeedbackMessage("Could not send email. Please download.");
-    } else {
-      setIsEmailSent(true);
     }
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsEmailSent(true);
   };
 
   const preparePDF = React.useCallback(async () => {
@@ -234,7 +235,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
             <span>Email Report</span>
           </h4>
 
-          {!isEmailSent ? (
+          {!isEmailButtonTouched ? (
             <div className="space-y-3">
               <input
                 type="email"
@@ -255,11 +256,12 @@ const ResultStep: React.FC<ResultStepProps> = ({
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <div className="flex items-center space-x-2">
                 <CheckCircle className="w-5 h-5 text-green-600" />
-                <span className="text-green-700 font-medium">
-                  Report sent to {email}
-                </span>
-                {emailFeedbackMessage && (
+                {!emailFeedbackMessage ? (
                   <span className="text-green-700 font-medium">
+                    Report sent to {email}
+                  </span>
+                ) : (
+                  <span className="text-red-700 font-medium">
                     {emailFeedbackMessage}
                   </span>
                 )}
