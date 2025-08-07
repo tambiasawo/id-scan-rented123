@@ -46,23 +46,27 @@ const saves3LinkInWordPress = async (
   dob: string
 ) => {
   const s3Url = await saveToS3(PDFfile, verificationPassed, fileName);
-  const response = await fetch("/api/store-url", {
-    method: "POST",
-    body: JSON.stringify({
-      last_name,
-      dob,
-      fileName,
-      report_url: s3Url,
-      verification_status: "Verified",
-    }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+  try {
+    const response = await fetch("/api/store-url", {
+      method: "POST",
+      body: JSON.stringify({
+        last_name,
+        dob,
+        fileName,
+        report_url: s3Url,
+        verification_status: "Verified",
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to save report URL");
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to save report URL");
+    }
+  } catch (e) {
+    console.log(e);
   }
 
   return s3Url;
