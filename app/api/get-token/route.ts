@@ -1,121 +1,54 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import https from "https";
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const token = searchParams.get("token");
-  if (!token) {
-    return NextResponse.json({ message: "Token is required" }, { status: 400 });
-  }
+  const agent = new https.Agent({ rejectUnauthorized: false });
 
-  // Build your WP URL
+  const token = searchParams.get("token") as string;
+  console.log("🔍 Incoming token:", token);
+
+  // 1) Log out your env vars
+  console.log(
+    "⚙️ WORDPRESS_TOKEN_BASE_API =",
+    process.env.WORDPRESS_TOKEN_BASE_API
+  );
+  console.log("🔐 CF_ACCESS_CLIENT_ID   =", process.env.CF_ACCESS_CLIENT_ID);
+
+  // 2) Build URL & headers
   const base = (process.env.WORDPRESS_TOKEN_BASE_API || "").replace(/\/+$/, "");
-  const url = `${base}/get-token?token=${encodeURIComponent(token)}`;
+  const url = `${base}/get-token/?token=${encodeURIComponent(token)}`;
+  const headers = {
+    Accept: "application/json",
+    "CF-Access-Client-Id": process.env.CF_ACCESS_CLIENT_ID as string,
+    "CF-Access-Client-Secret": process.env.CF_ACCESS_CLIENT_SECRET as string,
+  };
+  console.log("👉 Fetch URL:", url);
+  console.log("👉 Fetch headers:", headers);
 
-  try {
-    const response = await fetch(url, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        "CF-Access-Client-ID": process.env.CF_ACCESS_CLIENT_ID as string,
-        "CF-Access-Client-Secret": process.env
-          .CF_ACCESS_CLIENT_SECRET as string,
-      },
-    });
-    console.log(
-      "👉 Fetch URL:",
-      process.env.WORDPRESS_TOKEN_BASE_API,
-      process.env.CF_ACCESS_CLIENT_ID,
-      process.env.CF_ACCESS_CLIENT_SECRET,
-      {
-        base,
-      }
-    );
+  // 3) Fetch
+  const response = await fetch(url, { headers });
+  console.log(
+    "📥 Response status:",
+    response.status,
+    response.headers.get("content-type")
+  );
+  const text = await response.text();
+  console.log("📄 Raw body (first 200 chars):", text.slice(0, 200));
 
-    // Grab raw text first
-    const text = await response.text();
-    console.log("📥 Raw response (first 200 chars):", text.slice(0, 1000));
-
-    // Inspect content‐type header
-    console.log("📑 Content-Type:", response.headers.get("content-type"));
-
-    if (!response.ok) {
-      // If it’s an error page, text will show it
-      return NextResponse.json(
-        { message: `WP error ${response.status}`, details: text },
-        { status: response.status }
-      );
-    }
-
-    let data;
-    try {
-      data = JSON.parse(text);
-      console.log("Data", { data });
-    } catch (e) {
-      console.error("❌ JSON.parse failed:", e);
-      return NextResponse.json(
-        { message: "Invalid JSON from WP", details: text },
-        { status: 500 }
-      );
-    }
-
-    console.log("✅ Parsed JSON:", data);
-    return NextResponse.json(data);
-  } catch (err) {
-    console.error("🚨 Unexpected fetch error:", err);
-    return NextResponse.json({ message: "Unexpected error" }, { status: 500 });
+  // 4) Parse or error
+  if (!response.ok) {
+    return NextResponse.json({ message: text }, { status: response.status });
   }
-}
-
-/* import { NextResponse } from "next/server";
-
-export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const token = searchParams.get("token"); // Get the token from the query parameters
-
-  if (!token) {
-    return NextResponse.json({ message: "Token is required" }, { status: 400 });
-  }
-
   try {
-    const response = await fetch(
-      `${process.env.WORDPRESS_TOKEN_BASE_API}/get-token/?token=${token}`, // Send token as a query parameter
-      {
-        method: "GET",
-        headers: {
-          Accept: "application/json", // Optional: Specify that you expect a JSON response
-        },
-      }
-    );
-
-    console.log("base url: ", process.env.WORDPRESS_TOKEN_BASE_API);
-    const base = (process.env.WORDPRESS_TOKEN_BASE_API || "").replace(
-      /\/+$/,
-      ""
-    );
-    const url = `${base}/wp-json/scan_id/v1/get-token?token=${encodeURIComponent(
-      token
-    )}`;
-
-    console.log("🔗 Fetching token from:", base);
-    if (!response.ok) {
-      const error = await response.json();
-      return NextResponse.json(
-        {
-          message:
-            error.message || "Something went wrong. Please try again later",
-        },
-        { status: response.status || 500 }
-      );
-    }
-
-    const data = await response.json();
-    console.log("API Data", { data });
+    const data = JSON.parse(text);
+    console.log("JSON Data", { data });
     return NextResponse.json(data);
-  } catch (err) {
-    console.error("Could not fetch token:", err);
+  } catch (e) {
+    console.error("❌ JSON parse error:", e);
     return NextResponse.json(
-      { message: "An unexpected error occurred" },
+      { message: "Invalid JSON", details: text },
       { status: 500 }
     );
   }
 }
- */
