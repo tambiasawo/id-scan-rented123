@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     response.headers.get("content-type")
   );
   const text = await response.text();
-  console.log("📄 Raw body (first 200 chars):", text.slice(0, 200));
+  console.log("📄 Raw body (first 200 chars):", text.slice(0, 100));
 
   // 4) Parse or error
   if (!response.ok) {
