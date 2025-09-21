@@ -80,21 +80,10 @@ const ResultStep: React.FC<ResultStepProps> = ({
 
   const preparePDF = React.useCallback(async () => {
     const { doc, s3Url, first_name, last_name } =
-      await generateVerificationReport(verificationResultData, activeToken);
+      await generateVerificationReport(verificationResultData, activeToken,email);
     setEmailDetails({ s3Url, first_name, last_name });
     setPdfDoc(doc);
-    console.log({ s3Url, first_name, last_name, doc });
-    /* if (/^https?:\/\/\S+\.\S+/.test(s3Url) && doc) {
-      setEmailDetails({ s3Url, first_name, last_name });
-      setPdfDoc(doc);
-    } else {
-        setServerErrorMessage(
-        "Sorry, we could not generate the complete PDF. Please try again or contact us."
-      );
-      alertRef.current?.alert(
-        "Sorry, we could not generate the complete PDF. Please try again or contact us."
-      );
-    } */
+    
   }, [verificationResultData, activeToken]);
 
   useEffect(() => {
