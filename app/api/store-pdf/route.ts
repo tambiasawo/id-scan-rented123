@@ -10,7 +10,6 @@ export async function POST(req: Request) {
 
   // Convert the base64 or other file data to a Buffer
   const pdfBuffer = Buffer.from(PDFfile, "base64"); // Adjust encoding if necessary
-
   const s3 = new S3Client({
     region: AWS_REGION,
     credentials: {
