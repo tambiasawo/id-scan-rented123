@@ -55,7 +55,8 @@ const extractFields = (data: any) => {
 
 export const generateVerificationReport = async (
   data: any,
-  activeToken: string
+  activeToken: string,
+  email: string
 ) => {
   try {
     // Create a new PDF document
@@ -333,7 +334,7 @@ export const generateVerificationReport = async (
     const s3Url = await saves3LinkInWordPress(
       blob,
       true,
-      `${last_name}_${dob}_verification_report`,
+      `${email.replace("@", "at")}/${last_name}_${dob}_verification_report`,
       last_name,
       dob
     );
@@ -363,7 +364,11 @@ const saveToS3 = async (
 
   const response = await fetch("/api/store-pdf", {
     method: "POST",
-    body: JSON.stringify({ PDFfile: base64, fileName, verificationPassed }),
+    body: JSON.stringify({
+      PDFfile: base64,
+      fileName,
+      verificationPassed,
+    }),
     headers: { "Content-Type": "application/json" },
   });
 
