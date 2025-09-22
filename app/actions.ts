@@ -28,15 +28,21 @@ export const emailPDF = async (
     last_name: string;
     first_name: string;
   },
-  pdfUrl: string,
-  recipientEmail?: string
+  doc: Blob | undefined,
+  recipientEmail?: string,
 ) => {
+  const s3Url = saveToS3(
+    doc as Blob,
+    `${recipientEmail?.replace("@", "at")}/${userDetails.last_name}_${
+      userDetails.first_name
+    }_verification_report.pdf`
+  );
   return await fetch("/api/send-email/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       userDetails,
-      pdfUrl,
+      pdfUrl: s3Url,
       recipientEmail,
     }),
   });
@@ -55,8 +61,7 @@ const extractFields = (data: any) => {
 
 export const generateVerificationReport = async (
   data: any,
-  activeToken: string,
-  email: string
+  activeToken: string
 ) => {
   try {
     // Create a new PDF document
@@ -331,26 +336,15 @@ export const generateVerificationReport = async (
     });
     // Save and upload the PDF
     const blob = doc.output("blob");
-    const s3Url = await saves3LinkInWordPress(
-      blob,
-      true,
-      `${email.replace("@", "at")}/${last_name}_${dob}_verification_report`,
-      last_name,
-      dob
-    );
 
-    return { doc, s3Url, first_name, last_name };
+    return { doc, blob, first_name, last_name };
   } catch (err) {
     console.log(err);
     return { doc: null, s3Url: "", first_name: "", last_name: "" };
   }
 };
 
-const saveToS3 = async (
-  PDFfile: Blob,
-  verificationPassed: boolean,
-  fileName: string
-) => {
+const saveToS3 = async (PDFfile: Blob, fileName: string) => {
   const base64 = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(PDFfile);
@@ -367,7 +361,6 @@ const saveToS3 = async (
     body: JSON.stringify({
       PDFfile: base64,
       fileName,
-      verificationPassed,
     }),
     headers: { "Content-Type": "application/json" },
   });
@@ -382,32 +375,3 @@ const saveToS3 = async (
   return data.location;
 };
 
-const saves3LinkInWordPress = async (
-  PDFfile: Blob,
-  verificationPassed: boolean,
-  fileName: string,
-  last_name: string,
-  dob: string
-) => {
-  const s3Url = await saveToS3(PDFfile, verificationPassed, fileName);
-  const response = await fetch("/api/store-url", {
-    method: "POST",
-    body: JSON.stringify({
-      last_name,
-      dob,
-      fileName,
-      report_url: s3Url,
-      verification_status: "Verified",
-    }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to save report URL");
-  }
-
-  return s3Url;
-};
