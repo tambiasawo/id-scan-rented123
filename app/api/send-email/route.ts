@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
-import { logoImage } from "@/app/utils";
 const AWS_ACCESS_KEY_ID = process.env.ACCESS_KEY_ID!;
 const AWS_SECRET_ACCESS_KEY = process.env.ACCESS_KEY_SECRET!;
 const AWS_REGION = process.env.REGION!;
@@ -18,7 +17,7 @@ export async function POST(req: Request) {
   });
 
   const params = {
-    Source: "admin@rented123.com",
+    Source: "reports@rented123.com",
     Destination: {
       ToAddresses: recipientEmail
         ? ["reports@rented123.com", recipientEmail]
@@ -70,7 +69,7 @@ https://www.rented123.com
           <body>
             <div class="container">
               <div class="header">
-                  <img src="${logoImage}" alt="Rented123 Logo">
+                  <img src="https://rented123-brand-files.s3.us-west-2.amazonaws.com/logo_white.svg" alt="Rented123 Logo">
               </div>
               <div class="content">
                 <h2 style="color: #1a202c;">Your ID Verification is Complete</h2>
