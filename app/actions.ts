@@ -23,17 +23,27 @@ export const getToken = async (token: string) => {
   }
 };
 
+function emailToS3Prefix(email: string | undefined) {
+  if (!email) return "";
+  return email
+    .replace(/@/g, "_at_")
+    .replace(/\+/g, "_plus_")
+    .replace(/\./g, "_dot_")
+    .replace(/-/g, "_dash_")
+    .replace(/[^a-zA-Z0-9_]/g, "_"); // Same logic as your app
+}
+
 export const emailPDF = async (
   userDetails: {
     last_name: string;
     first_name: string;
   },
   doc: Blob | undefined,
-  recipientEmail?: string,
+  recipientEmail?: string
 ) => {
   const s3Url = saveToS3(
     doc as Blob,
-    `${recipientEmail?.replace("@", "at")}/${userDetails.last_name}_${
+    `${emailToS3Prefix(recipientEmail)}/${userDetails.last_name}_${
       userDetails.first_name
     }_verification_report.pdf`
   );
@@ -374,4 +384,3 @@ const saveToS3 = async (PDFfile: Blob, fileName: string) => {
   const data = await response.json();
   return data.location;
 };
-
