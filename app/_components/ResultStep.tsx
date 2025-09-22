@@ -11,6 +11,7 @@ import {
   Calendar,
   Shield,
   Eye,
+  Info,
 } from "lucide-react";
 import { emailPDF, generateVerificationReport } from "../actions";
 import { VerificationResultDataType } from "../types";
@@ -37,9 +38,9 @@ const ResultStep: React.FC<ResultStepProps> = ({
   const [email, setEmail] = useState("");
   const [showPdfPreview, setShowPdfPreview] = useState(false);
   const [emailDetails, setEmailDetails] = useState({
-    s3Url: "",
     first_name: "",
     last_name: "",
+    blob: typeof Blob !== "undefined" ? new Blob() : undefined,
   });
   const [pdfDoc, setPdfDoc] = useState<jsPDF | null>();
   const [emailFeedbackMessage, setEmailFeedbackMessage] = useState<
@@ -64,7 +65,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
           last_name: emailDetails.last_name,
           first_name: emailDetails.first_name,
         },
-        emailDetails.s3Url,
+        emailDetails.blob,
         email
       );
       if (!response.ok) {
@@ -79,11 +80,10 @@ const ResultStep: React.FC<ResultStepProps> = ({
   };
 
   const preparePDF = React.useCallback(async () => {
-    const { doc, s3Url, first_name, last_name } =
-      await generateVerificationReport(verificationResultData, activeToken,email);
-    setEmailDetails({ s3Url, first_name, last_name });
+    const { doc, blob, first_name, last_name } =
+      await generateVerificationReport(verificationResultData, activeToken);
+    setEmailDetails({ first_name, last_name, blob });
     setPdfDoc(doc);
-    
   }, [verificationResultData, activeToken]);
 
   useEffect(() => {
@@ -208,8 +208,8 @@ const ResultStep: React.FC<ResultStepProps> = ({
           <div className="flex space-x-3">
             <button
               onClick={handleDownload}
-              // disabled={!Boolean(pdfDoc)}
-              className="disabled:cursor-not-allowed flex-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-[#32429b] text-white py-3 px-4 rounded-lg font-semibold hover:blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
+              disabled={!isSuccess}
+              className="disabled:cursor-not-allowed disabled:bg-none flex-1 flex items-center justify-center space-x-2 bg-gradient-to-r from-blue-600 to-[#32429b] text-white py-3 px-4 rounded-lg font-semibold hover:blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
             >
               <Download className="w-5 h-5" />
               <span>Download PDF</span>
@@ -236,7 +236,7 @@ const ResultStep: React.FC<ResultStepProps> = ({
               <button
                 onClick={handleEmailSend}
                 disabled={!email}
-                className="w-full bg-gray-700 text-white py-3 px-4 rounded-lg font-semibold hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="w-full disabled:bg-none bg-gradient-to-r from-blue-600 to-[#32429b] text-white py-3 px-4 rounded-lg font-semibold hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 Send Report via Email
               </button>
@@ -257,6 +257,13 @@ const ResultStep: React.FC<ResultStepProps> = ({
               </div>
             </div>
           )}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex mt-4 items-center space-x-2 text-sm ">
+            <Info size={12} className=" text-blue-700" />
+            <p className="text-xs text-blue-700">
+              Your report will be saved in our system. You can access it using
+              this same email from your Rented123 dashboard
+            </p>
+          </div>
         </div>
 
         <button
