@@ -6,7 +6,7 @@ const AWS_SECRET_ACCESS_KEY = process.env.ACCESS_KEY_SECRET!;
 const AWS_REGION = process.env.REGION!;
 
 export async function POST(req: Request) {
-  const { PDFfile, fileName, verificationPassed } = await req.json();
+  const { PDFfile, fileName } = await req.json();
 
   // Convert the base64 or other file data to a Buffer
   const pdfBuffer = Buffer.from(PDFfile, "base64"); // Adjust encoding if necessary
@@ -18,9 +18,7 @@ export async function POST(req: Request) {
     },
   });
   const params = {
-    Bucket: verificationPassed
-      ? "verified-id-reports"
-      : "unverified-id-reports",
+    Bucket: "verified-id-reports",
     Key: fileName,
     Body: pdfBuffer,
     ContentType: "application/pdf",
