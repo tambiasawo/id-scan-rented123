@@ -69,7 +69,7 @@ https://www.rented123.com
           <body>
             <div class="container">
               <div class="header">
-                  <img src="https://rented123-brand-files.s3.us-west-2.amazonaws.com/logo_white.svg" alt="Rented123 Logo">
+                  <img width="100px" height="100px" src="https://rented123-brand-files.s3.us-west-2.amazonaws.com/logo_white.svg" alt="Rented123 Logo">
               </div>
               <div class="content">
                 <h2 style="color: #1a202c;">Your ID Verification is Complete</h2>
@@ -83,7 +83,7 @@ https://www.rented123.com
               </div>
               <div class="footer">
                 <p>&copy; ${new Date().getFullYear()} Rented123. All rights reserved.</p>
-                <p>123 Main Street, Vancouver, BC, Canada</p>
+                <p>2185 Austin Ave., Coquitlam, BC, Canada</p>
               </div>
             </div>
           </body>
