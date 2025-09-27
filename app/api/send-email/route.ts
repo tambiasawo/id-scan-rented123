@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   });
 
   const params = {
-    Source: "reports@rented123.com",
+    Source: "Rented123 Reports <reports@rented123.com>",
     Destination: {
       ToAddresses: recipientEmail
         ? ["reports@rented123.com", recipientEmail]
